@@ -2,33 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>URL Raw Deflate Decompressor</title>
+  <title>MegaOke Web MIDI Ripper</title>
 </head>
 <body>
-  <h2>Decompress Raw Deflate from URL</h2>
+  <h2>Decrypt MegaOke MIDI File from Song ID</h2>
 
-  <input type="text" id="urlInput" placeholder="https://tyfmegaoke.com/api/play/" style="width: 400px;" />
-  <button id="decompressBtn">Fetch & Decompress</button>
+  <input type="text" id="idInput" placeholder="Find the Song ID in MegaOke Web and paste here..." style="width: 400px;" />
+  <button id="btn">Fetch MIDI and Decyrpt</button>
 
   <p id="status"></p>
 
-  <!-- Pako library -->
+  <!-- Pako -->
   <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 
   <script>
-    const urlInput = document.getElementById("urlInput");
+    const idInput = document.getElementById("idInput");
     const status = document.getElementById("status");
-    const btn = document.getElementById("decompressBtn");
+    const btn = document.getElementById("btn");
+
+    const BASE_URL = "https://example.com/api/";
 
     btn.addEventListener("click", async () => {
-      const url = urlInput.value.trim();
+      const id = idInput.value.trim();
 
-      if (!url) {
-        status.textContent = "Please enter a URL.";
+      if (!id) {
+        status.textContent = "Please enter a Song ID.";
         return;
       }
 
-      status.textContent = "Fetching file...";
+      const url = BASE_URL + encodeURIComponent(id);
+
+      status.textContent = "Fetching: " + url;
 
       try {
         const res = await fetch(url);
@@ -37,12 +41,10 @@
           throw new Error("HTTP error " + res.status);
         }
 
-        const arrayBuffer = await res.arrayBuffer();
-        const compressed = new Uint8Array(arrayBuffer);
+        const compressed = new Uint8Array(await res.arrayBuffer());
 
-        status.textContent = "Decrypting...";
+        status.textContent = "Decompressing...";
 
-        // raw deflate
         const decompressed = pako.inflateRaw(compressed);
 
         status.textContent = "Preparing download...";
@@ -53,10 +55,7 @@
         const a = document.createElement("a");
         a.href = blobUrl;
 
-        let outName = url.split("/").pop() || "output.bin";
-        outName = outName.replace(/\.deflate$|\.raw$|\.bin$/i, "");
-        if (!outName.includes(".")) outName += ".mid";
-
+        const outName = id + ".mid";
         a.download = outName;
 
         document.body.appendChild(a);
