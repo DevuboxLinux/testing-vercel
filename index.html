@@ -40,7 +40,7 @@
         const arrayBuffer = await res.arrayBuffer();
         const compressed = new Uint8Array(arrayBuffer);
 
-        status.textContent = "Decompressing...";
+        status.textContent = "Decrypting...";
 
         // raw deflate
         const decompressed = pako.inflateRaw(compressed);
