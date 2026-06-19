@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>URL Raw Deflate Decompressor</title>
+</head>
+<body>
+  <h2>Decompress Raw Deflate from URL</h2>
+
+  <input type="text" id="urlInput" placeholder="https://tyfmegaoke.com/api/play/" style="width: 400px;" />
+  <button id="decompressBtn">Fetch & Decompress</button>
+
+  <p id="status"></p>
+
+  <!-- Pako library -->
+  <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+
+  <script>
+    const urlInput = document.getElementById("urlInput");
+    const status = document.getElementById("status");
+    const btn = document.getElementById("decompressBtn");
+
+    btn.addEventListener("click", async () => {
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        status.textContent = "Please enter a URL.";
+        return;
+      }
+
+      status.textContent = "Fetching file...";
+
+      try {
+        const res = await fetch(url);
+
+        if (!res.ok) {
+          throw new Error("HTTP error " + res.status);
+        }
+
+        const arrayBuffer = await res.arrayBuffer();
+        const compressed = new Uint8Array(arrayBuffer);
+
+        status.textContent = "Decompressing...";
+
+        // raw deflate
+        const decompressed = pako.inflateRaw(compressed);
+
+        status.textContent = "Preparing download...";
+
+        const blob = new Blob([decompressed]);
+        const blobUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = blobUrl;
+
+        let outName = url.split("/").pop() || "output.bin";
+        outName = outName.replace(/\.deflate$|\.raw$|\.bin$/i, "");
+        if (!outName.includes(".")) outName += ".mid";
+
+        a.download = outName;
+
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(blobUrl);
+
+        status.textContent = "Done!";
+      } catch (err) {
+        console.error(err);
+        status.textContent = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
