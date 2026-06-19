@@ -8,6 +8,9 @@
   <h2>Decrypt MegaOke MIDI File from Song ID</h2>
 
   <input type="text" id="idInput" placeholder="Find the Song ID in MegaOke Web and paste here..." style="width: 400px;" />
+  <a href="https://example.com">
+  <button>Open MegaOke Web</button>
+  </a>
   <button id="btn">Fetch MIDI and Decyrpt</button>
 
   <p id="status"></p>
@@ -43,7 +46,7 @@
 
         const compressed = new Uint8Array(await res.arrayBuffer());
 
-        status.textContent = "Decompressing...";
+        status.textContent = "Decrypting...";
 
         const decompressed = pako.inflateRaw(compressed);
 
